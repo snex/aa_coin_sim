@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    random_variate_generator (0.0.2)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  random_variate_generator
+
+BUNDLED WITH
+   2.2.22
