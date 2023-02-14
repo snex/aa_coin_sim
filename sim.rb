@@ -78,6 +78,8 @@ puts "running for #{WEEKS_MAX} weeks..."
 
 WEEKS_MAX.times do |week|
   puts "week #{week}"
+  puts "..calculating agent actions"
+
   agents.each_with_index do |agent, i|
     agent_coins = agent[:coins]
     coins_to_sell, coins_to_stake, coins_to_reinvest, coins_to_buy = get_randoms_summing_to(agent_coins, ACTIONS.size)
@@ -87,6 +89,11 @@ WEEKS_MAX.times do |week|
       agent[:coins_to_sell][i] += c
     end
   end
+
+  puts "..agent actions calculated"
+  puts "..enacting agent actions"
+  puts "week #{week} finished"
+  puts ""
 end
 
 puts "results:"
