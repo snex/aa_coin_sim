@@ -86,7 +86,7 @@ WEEKS_MAX.times do |week|
     sell_per_week = get_randoms_summing_to(coins_to_sell, ACTION_WEEKS_MAX)
 
     sell_per_week.each_with_index do |c, i|
-      agent[:coins_to_sell][i] += c
+      agent[:coins_to_sell][i + week] += c
     end
   end
 
