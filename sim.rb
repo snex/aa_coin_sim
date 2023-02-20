@@ -17,6 +17,7 @@ WEEKS_MAX = 100
 ################ DO NOT EDIT BELOW #####################
 
 require 'awesome_print'
+require 'pry'
 require 'random_variate_generator'
 
 def get_randoms_summing_to(target_sum, num_randoms)
@@ -65,10 +66,10 @@ while coins_allocated < AA_COINS do
 
   agents.push({
     coins: coins_to_allocate,
-    coins_to_sell: Hash[Array.new(ACTION_WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
-    coins_to_stake: Hash[Array.new(ACTION_WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
-    coins_to_reinvest: Hash[Array.new(ACTION_WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
-    coins_to_buy: Hash[Array.new(ACTION_WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }]
+    coins_to_sell: Hash[Array.new(WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
+    coins_to_stake: Hash[Array.new(WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
+    coins_to_reinvest: Hash[Array.new(WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }],
+    coins_to_buy: Hash[Array.new(WEEKS_MAX).each_with_index.map { |x, i| [i, 0] }]
   })
 end
 
@@ -87,10 +88,12 @@ WEEKS_MAX.times do |week|
     buy_per_week = get_randoms_summing_to(coins_to_buy, ACTION_WEEKS_MAX)
 
     sell_per_week.each_with_index do |c, i|
+      next if i + week >= WEEKS_MAX
       agent[:coins_to_sell][i + week] += c
     end
 
     buy_per_week.each_with_index do |c, i|
+      next if i + week >= WEEKS_MAX
       agent[:coins_to_buy][i + week] += c
     end
   end
