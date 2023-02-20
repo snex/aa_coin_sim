@@ -83,7 +83,10 @@ WEEKS_MAX.times do |week|
 
   agents.each_with_index do |agent, i|
     agent_coins = agent[:coins]
-    coins_to_sell, coins_to_stake, coins_to_reinvest, coins_to_buy = get_randoms_summing_to(agent_coins, ACTIONS.size)
+    # do not base coins_to_buy on agent's current coin holdings
+    coins_to_sell, coins_to_stake, coins_to_reinvest = get_randoms_summing_to(agent_coins, ACTIONS.size - 1)
+    coins_to_buy = 0 # something??
+
     sell_per_week = get_randoms_summing_to(coins_to_sell, ACTION_WEEKS_MAX)
     buy_per_week = get_randoms_summing_to(coins_to_buy, ACTION_WEEKS_MAX)
 
