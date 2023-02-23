@@ -1,5 +1,4 @@
 AA_COINS = 1_000_000_000.freeze
-DOLLARS = 10_000_000.freeze
 
 # odds that a given coin owned by an agent will be subject to a given action
 ACTIONS = {
@@ -25,8 +24,13 @@ def sell_penalty(weeks)
   10 * ((1 / 1.0471285481) ** weeks)
 end
 
+def coin_value_in_dollars(pennies)
+  '%0.02f' % ((pennies / 100.0) / AA_COINS).round(2)
+end
+
 agents = []
 coins_allocated = 0
+pennies = 100_000_000_000
 risk_pool = 0
 reward_pool = 0
 owner_pool = 0
@@ -77,7 +81,16 @@ WEEKS_MAX.times do |week|
 
   puts "..agent actions calculated"
   puts "..enacting agent actions"
+
+  agents.each do |agent|
+    coins_allocated -= agent[:coins_to_sell][week]
+    pennies += agent[:coins_to_sell][week]
+    agent[:coins_to_sell][week] = 0
+  end
+
   puts "week #{week} finished"
+  puts "dollars in vault: #{(pennies / 100.0).round(2)}"
+  puts "AA Coin value: #{coin_value_in_dollars(pennies)}"
   puts ""
 end
 
