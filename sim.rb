@@ -1,50 +1,25 @@
-AA_COINS = 1_000_000_000
-DOLLARS = 10_000_000
+AA_COINS = 1_000_000_000.freeze
+DOLLARS = 10_000_000.freeze
 
+# odds that a given coin owned by an agent will be subject to a given action
 ACTIONS = {
-  (0..(0.25)) =>      :sell,
-  ((0.25)...(0.5)) => :stake,
-  ((0.5)...(0.75)) => :reinvest,
-  ((0.75)...1) =>     :buy
-}
+  sell:     0.05,
+  stake:    0.75,
+  reinvest: 0.20
+}.freeze
 
 # the number of weeks somebody can commit to in the future
-ACTION_WEEKS_MAX = 50
+ACTION_WEEKS_MAX = 50.freeze
 
 # number of weeks to run the sim
-WEEKS_MAX = 100
+WEEKS_MAX = 100.freeze
 
 ################ DO NOT EDIT BELOW #####################
 
 require 'awesome_print'
 require 'pry'
 require 'random_variate_generator'
-
-def get_randoms_summing_to(target_sum, num_randoms)
-  denormalized = []
-  orig_num_randoms = num_randoms
-
-  if num_randoms > target_sum
-    num_randoms = target_sum
-  end
-
-  while denormalized.sum != target_sum do
-    normalized = []
-    denormalized.clear
-    num_randoms.times do
-      normalized.push(rand)
-    end
-
-    normalized_sum = normalized.sum
-    denormalized = normalized.map { |n| (target_sum * (n / normalized_sum)).round }
-  end
-
-  if orig_num_randoms != num_randoms
-    return (denormalized + Array.new(orig_num_randoms - num_randoms, 0)).shuffle
-  end
-
-  denormalized
-end
+require_relative 'util'
 
 def sell_penalty(weeks)
   10 * ((1 / 1.0471285481) ** weeks)
@@ -83,8 +58,7 @@ WEEKS_MAX.times do |week|
 
   agents.each_with_index do |agent, i|
     agent_coins = agent[:coins]
-    # do not base coins_to_buy on agent's current coin holdings
-    coins_to_sell, coins_to_stake, coins_to_reinvest = get_randoms_summing_to(agent_coins, ACTIONS.size - 1)
+    coins_to_sell, coins_to_stake, coins_to_reinvest = get_randoms_summing_to(agent_coins, ACTIONS.size, ACTIONS.values)
     coins_to_buy = 0 # something??
 
     sell_per_week = get_randoms_summing_to(coins_to_sell, ACTION_WEEKS_MAX)
