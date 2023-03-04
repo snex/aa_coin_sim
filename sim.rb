@@ -73,8 +73,8 @@ class Sim
   end
 
   def process_weeks
-    puts "dollars in vault: #{(@pennies_in_vault / 100.0).round(2)}"
-    puts "AA Coin value: #{coin_value_in_dollars}"
+    puts "dollars in vault: #{print_money((@pennies_in_vault / 100.0).round(2))}"
+    puts "AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts ''
     puts "running for #{WEEKS_MAX} weeks..."
 
@@ -89,8 +89,8 @@ class Sim
     puts ''
     enact_agent_actions(week)
     puts ''
-    puts "..dollars in vault: #{(@pennies_in_vault / 100.0).round(2)}"
-    puts "..AA Coin value: #{coin_value_in_dollars}"
+    puts "..dollars in vault: #{print_money((@pennies_in_vault / 100.0).round(2))}"
+    puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts "week #{week + 1} finished"
     puts ''
   end
