@@ -10,7 +10,7 @@ class Sim
   # total number of coins in existence
   # use the large number for the real sim. 1_000 is turned on for testing purposes
   # AA_COINS = 1_000_000_000.freeze
-  AA_COINS = 1_000.freeze
+  AA_COINS = 1_000_000.freeze
 
   # odds that a given coin owned by an agent will be subject to a given action
   ACTIONS = {
