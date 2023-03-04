@@ -41,7 +41,6 @@ class Sim
     initiate_agents
     puts ''
     process_weeks
-    puts ''
     puts "results:"
   end
 
@@ -74,6 +73,9 @@ class Sim
   end
 
   def process_weeks
+    puts "dollars in vault: #{(@pennies_in_vault / 100.0).round(2)}"
+    puts "AA Coin value: #{coin_value_in_dollars}"
+    puts ''
     puts "running for #{WEEKS_MAX} weeks..."
 
     WEEKS_MAX.times do |week|
@@ -82,13 +84,14 @@ class Sim
   end
 
   def process_week(week)
-    puts "week #{week}"
+    puts "week #{week + 1}"
     calculate_agent_actions(week)
     puts ''
     enact_agent_actions(week)
-    puts "week #{week} finished"
-    puts "dollars in vault: #{(@pennies_in_vault / 100.0).round(2)}"
-    puts "AA Coin value: #{coin_value_in_dollars}"
+    puts ''
+    puts "..dollars in vault: #{(@pennies_in_vault / 100.0).round(2)}"
+    puts "..AA Coin value: #{coin_value_in_dollars}"
+    puts "week #{week + 1} finished"
     puts ''
   end
 
@@ -117,6 +120,7 @@ class Sim
       end
     end
 
+    puts '..agent actions completed'
     @pennies_in_vault += threads.map { |t| t.value * coin_value_in_pennies * sell_penalty(0) }.sum
   end
 end
