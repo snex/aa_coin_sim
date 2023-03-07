@@ -11,7 +11,9 @@ class Auction
     value_to_remove_from_vault = 0
     coins_at_auction = @agents.map { |agent| agent.action_table[:coins_to_reinvest][@week] }.sum
 
+    # this value will come from buyers
     buyer_bid_amount = 0
+
     total_bid_amount = @vault.coin_value + buyer_bid_amount
     pennies_reinvested = @vault.coin_value * coins_at_auction
     total_auction_price = total_bid_amount + pennies_reinvested
