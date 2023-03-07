@@ -3,6 +3,7 @@ require 'pry'
 require 'random_variate_generator'
 require_relative 'util'
 require_relative 'agent'
+require_relative 'auction'
 
 class Sim
   ################ EDIT BELOW ###########################
@@ -42,7 +43,6 @@ class Sim
     initiate_agents
     puts ''
     process_weeks
-    puts "results:"
   end
 
   private
@@ -101,6 +101,11 @@ class Sim
     puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts "week #{week + 1} finished"
     puts ''
+
+    if @vault == 0
+      puts "VAULT WENT TO ZERO!"
+      exit
+    end
   end
 
   def calculate_agent_actions(week)
@@ -125,6 +130,9 @@ class Sim
 
     puts '....reinvesting coins'
     enact_agent_reinvest_coins(week)
+
+    puts '....running auction'
+    Auction.new(@auction_pool, @agents).run_auction
 
     puts '..agent actions completed'
   end
