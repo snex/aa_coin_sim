@@ -14,9 +14,9 @@ class Sim
 
   # odds that a given coin owned by an agent will be subject to a given action
   ACTIONS = {
-    sell:     0.05,
-    stake:    0.75,
-    reinvest: 0.20
+    sell:     0.0001,
+    reinvest: 0.35,
+    stake:    0.65
   }.freeze
 
   # the number of weeks somebody can commit to in the future
@@ -30,15 +30,12 @@ class Sim
   def initialize
     # coin accounts
     @vault = AA_COINS.dup
+    @coins_allocated_to_users = 0
     @holding_pool = 0
+    @auction_pool = 0
 
     @agents = []
-    @coins_allocated = 0
     @pennies_in_vault = 100_000_000_000
-    @risk_pool = 0
-    @reward_pool = 0
-    @owner_pool = 0
-    @promise_buy_pool = 0
   end
 
   def run
@@ -69,11 +66,10 @@ class Sim
   def initiate_agents
     puts 'initiating agents...'
 
-    while @coins_allocated < @vault do
-      coins_remaining = @vault - @coins_allocated
+    while @coins_allocated_to_users < @vault do
+      coins_remaining = @vault - @coins_allocated_to_users
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
-      @coins_allocated += coins_to_allocate
-      puts "coins_allocated: #{@coins_allocated}"
+      @coins_allocated_to_users += coins_to_allocate
 
       @agents.push(Agent.new(coins_to_allocate, ACTIONS))
     end
@@ -100,6 +96,7 @@ class Sim
     puts ''
     puts "..coins in vault: #{print_number(@vault)}"
     puts "..coins in holding pool: #{print_number(@holding_pool)}"
+    puts "..coins in auction pool: #{print_number(@auction_pool)}"
     puts "..dollars in vault: #{print_money(dollars_in_vault)}"
     puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts "week #{week + 1} finished"
@@ -123,6 +120,16 @@ class Sim
 
   def enact_agent_actions(week)
     puts '..enacting agent actions'
+    puts '....selling coins'
+    enact_agent_sell_coins(week)
+
+    puts '....reinvesting coins'
+    enact_agent_reinvest_coins(week)
+
+    puts '..agent actions completed'
+  end
+
+  def enact_agent_sell_coins(week)
     threads = []
 
     @agents.each do |agent|
@@ -131,10 +138,23 @@ class Sim
       end
     end
 
-    puts '..agent actions completed'
     coins_sold = threads.map { |t| t.value }.sum
     @pennies_in_vault += coins_sold * coin_value_in_pennies * sell_penalty(0)
     @vault -= coins_sold
     @holding_pool += coins_sold
+  end
+
+  def enact_agent_reinvest_coins(week)
+    threads = []
+
+    @agents.each do |agent|
+      threads << Thread.new do
+        agent.reinvest_coins(week)
+      end
+    end
+
+    coins_reinvested = threads.map { |t| t.value }.sum
+    @vault -= coins_reinvested
+    @auction_pool += coins_reinvested
   end
 end
