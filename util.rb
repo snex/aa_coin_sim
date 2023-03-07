@@ -1,5 +1,9 @@
+def print_number(num)
+  num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+end
+
 def print_money(dollars)
-  "$#{dollars.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}"
+  "$#{print_number(dollars)}"
 end
 
 def get_randoms_summing_to(target_sum, num_randoms, dist = Array.new(num_randoms, 1.0))

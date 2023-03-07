@@ -28,6 +28,10 @@ class Sim
   ################ DO NOT EDIT BELOW ####################
 
   def initialize
+    # coin accounts
+    @vault = AA_COINS.dup
+    @holding_pool = 0
+
     @agents = []
     @coins_allocated = 0
     @pennies_in_vault = 100_000_000_000
@@ -65,10 +69,11 @@ class Sim
   def initiate_agents
     puts 'initiating agents...'
 
-    while @coins_allocated < AA_COINS do
-      coins_remaining = AA_COINS - @coins_allocated
-      coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, @coins_remaining)
+    while @coins_allocated < @vault do
+      coins_remaining = @vault - @coins_allocated
+      coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
       @coins_allocated += coins_to_allocate
+      puts "coins_allocated: #{@coins_allocated}"
 
       @agents.push(Agent.new(coins_to_allocate, ACTIONS))
     end
@@ -93,6 +98,8 @@ class Sim
     puts ''
     enact_agent_actions(week)
     puts ''
+    puts "..coins in vault: #{print_number(@vault)}"
+    puts "..coins in holding pool: #{print_number(@holding_pool)}"
     puts "..dollars in vault: #{print_money(dollars_in_vault)}"
     puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts "week #{week + 1} finished"
@@ -125,6 +132,9 @@ class Sim
     end
 
     puts '..agent actions completed'
-    @pennies_in_vault += threads.map { |t| t.value * coin_value_in_pennies * sell_penalty(0) }.sum
+    coins_sold = threads.map { |t| t.value }.sum
+    @pennies_in_vault += coins_sold * coin_value_in_pennies * sell_penalty(0)
+    @vault -= coins_sold
+    @holding_pool += coins_sold
   end
 end
