@@ -2,40 +2,65 @@ require_relative 'util'
 
 class Vault
   def initialize(coins, cash)
-    @coin_vault = CoinVault.new(coins)
-    @cash_vault = CashVault.new(cash)
+    @coin_accounts = {
+      coin_vault:   CoinAccount.new(coins),
+      holding_pool: CoinAccount.new(0)
+    }
+    @cash_accounts = {
+      cash_vault:         CashAccount.new(cash),
+      reward_pool:        CashAccount.new(0),
+      # for the purpose of the sim, these can all be one giant bucket
+      customer_payouts:   CashAccount.new(0),
+      customer_purchases: CashAccount.new(Float::INFINITY)
+    }
   end
 
-  def coins
-    @coin_vault.coins
+  def coins(account = :coin_vault)
+    @coin_accounts[account].coins
   end
 
-  def cash
-    @cash_vault.pennies
+  def cash(account = :cash_vault)
+    @cash_accounts[account].pennies
   end
 
-  def credit_coins(coins)
-    @coin_vault.credit(coins)
+  def xfer_coins(debit_account, credit_account, coins)
+    @coin_accounts[debit_account].debit(coins)
+    @coin_accounts[credit_account].credit(coins)
+    puts "xfer #{print_number(coins)} from #{debit_account} to #{credit_account}"
   end
 
-  def credit_cash(pennies)
-    @cash_vault.credit(pennies)
-  end
-
-  def debit_coins(coins)
-    @coin_vault.debit(coins)
-  end
-
-  def debit_cash(pennies)
-    @cash_vault.debit(pennies)
+  def xfer_cash(debit_account, credit_account, pennies)
+    @cash_accounts[debit_account].debit(pennies)
+    @cash_accounts[credit_account].credit(pennies)
+    puts "xfer #{print_number(pennies)} from #{debit_account} to #{credit_account}"
   end
 
   def coin_value
-    @cash_vault.pennies / @coin_vault.coins
+    @cash_accounts[:cash_vault].pennies / @coin_accounts[:coin_vault].coins
+  end
+
+  def total_coins
+    @coin_accounts.values.map(&:coins).sum
+  end
+
+  def total_cash
+    @cash_accounts.reject { |k,v| customer_accounts.include?(k) }.values.map(&:pennies).sum
+  end
+
+  def total_cash_dollars
+    '%0.02f' % (total_cash / 100.0).round(2)
   end
 
   def to_s
-    "#{@coin_vault}, #{@cash_vault} = $#{print_number(coin_value_dollars)}"
+    @coin_accounts.map do |k,v|
+      "#{k.to_s.rjust(20)}: #{v}\n"
+    end.join +
+    "Total:".rjust(21) + "∀#{print_number(total_coins)}\n\n".rjust(23) +
+    @cash_accounts.map do |k,v|
+      "#{k.to_s.rjust(20)}: #{v}\n"
+    end.join +
+    "Total:".rjust(21) + "$#{print_number(total_cash_dollars)}\n\n".rjust(26) +
+    "Coin Price:".rjust(21) + "$#{print_number(coin_value_dollars)}".rjust(24) + "/coin"
   end
 
   private
@@ -43,9 +68,13 @@ class Vault
   def coin_value_dollars
     '%0.02f' % (coin_value / 100.0).round(2)
   end
+
+  def customer_accounts
+    [:customer_payouts, :customer_purchases]
+  end
 end
 
-class CoinVault
+class CoinAccount
   attr_reader :coins
 
   def initialize(coins)
@@ -61,11 +90,11 @@ class CoinVault
   end
 
   def to_s
-    "AA#{print_number(@coins)}"
+    "∀#{print_number(@coins)}".rjust(20)
   end
 end
 
-class CashVault
+class CashAccount
   attr_reader :pennies
 
   def initialize(pennies)
@@ -85,6 +114,6 @@ class CashVault
   end
 
   def to_s
-    "$#{print_number(dollars)}"
+    "$#{print_number(dollars)}".rjust(23)
   end
 end

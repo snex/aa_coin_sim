@@ -8,11 +8,13 @@ class Auction
   end
 
   def run_auction
+    pre_auction_vault_cash = @vault.cash
     value_to_remove_from_vault = 0
     coins_at_auction = @agents.map { |agent| agent.action_table[:coins_to_reinvest][@week] }.sum
 
     # this value will come from buyers
     buyer_bid_amount = 0
+    @vault.xfer_cash(:customer_purchases, :cash_vault, buyer_bid_amount)
 
     total_bid_amount = @vault.coin_value + buyer_bid_amount
     pennies_reinvested = @vault.coin_value * coins_at_auction
@@ -36,7 +38,7 @@ class Auction
       agent.deposit_coins(reinvested_coins_returned)
     end
 
-    value_to_remove_from_vault - total_bid_amount
-    @vault.debit_cash(value_to_remove_from_vault - total_bid_amount)
+    @vault.xfer_cash(:cash_vault, :customer_payouts, value_to_remove_from_vault)
+    #@vault.xfer_cash(:reward_pool, :cash_vault, @vault.cash - pre_auction_vault_cash)
   end
 end

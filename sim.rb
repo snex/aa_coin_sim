@@ -16,7 +16,7 @@ class Sim
   AA_COINS = 1_000_000.freeze
 
   # total amount of starting cash in pennies
-  START_CASH = 100_000_000.freeze
+  START_CASH = 100_000_000_000.freeze
 
   # odds that a given coin owned by an agent will be subject to a given action
   ACTIONS = {
@@ -35,13 +35,6 @@ class Sim
 
   def initialize
     @vault = Vault.new(AA_COINS.dup, START_CASH.dup)
-
-    # coin accounts
-    @holding_pool = 0
-
-    # cash accounts
-    @reward_pool = 0
-
     @agents = []
   end
 
@@ -54,7 +47,7 @@ class Sim
   private
 
   def sell_penalty(weeks)
-    10 * ((1 / 1.0471285481) ** weeks)
+    (10 * ((1 / 1.0471285481) ** weeks) / 100.0)
   end
 
   def initiate_agents
@@ -87,10 +80,9 @@ class Sim
     puts ''
     enact_agent_actions(week)
     puts ''
-    puts "..vault: #{@vault}"
-    puts "..coins in holding pool: #{print_number(@holding_pool)}"
-    puts "..dollars in reward pool: $#{print_number('%0.02f' % (@reward_pool / 100.0).round(2))}"
     puts "week #{week + 1} finished"
+    puts ''
+    puts @vault
     puts ''
 
     if @vault.coins == 0 || @vault.cash == 0
@@ -117,11 +109,7 @@ class Sim
   def enact_agent_actions(week)
     puts '..enacting agent actions'
     puts '....running auction'
-    pre_auction_vault = @vault.cash
-    pennies_paid_out = Auction.new(@vault, @agents, week).run_auction
-    reward_pool_payout = @vault.cash - pre_auction_vault
-    @vault.debit_cash(reward_pool_payout)
-    @reward_pool += reward_pool_payout
+    Auction.new(@vault, @agents, week).run_auction
 
     puts '....selling coins'
     enact_agent_sell_coins(week)
@@ -139,8 +127,11 @@ class Sim
     end
 
     coins_sold = threads.map { |t| t.value }.sum
-    @vault.credit_cash(coins_sold * @vault.coin_value * sell_penalty(0))
-    @vault.debit_coins(coins_sold)
-    @holding_pool += coins_sold
+    sell_amt = (coins_sold * @vault.coin_value).to_i
+    amt_to_customer = (sell_amt * (1 - sell_penalty(0))).to_i
+    amt_to_reward_pool = sell_amt - amt_to_customer
+    @vault.xfer_cash(:cash_vault, :customer_payouts, amt_to_customer)
+    @vault.xfer_cash(:cash_vault, :reward_pool, amt_to_reward_pool)
+    @vault.xfer_coins(:coin_vault, :holding_pool, coins_sold)
   end
 end
