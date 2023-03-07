@@ -24,7 +24,7 @@ class Sim
   ACTION_WEEKS_MAX = 50.freeze
 
   # number of weeks to run the sim
-  WEEKS_MAX = 100.freeze
+  WEEKS_MAX = 2.freeze
 
   ################ DO NOT EDIT BELOW ####################
 
@@ -33,10 +33,12 @@ class Sim
     @vault = AA_COINS.dup
     @coins_allocated_to_users = 0
     @holding_pool = 0
-    @auction_pool = 0
+
+    # cash accounts
+    @pennies_in_vault = 100_000_000_000
+    @reward_pool = 0
 
     @agents = []
-    @pennies_in_vault = 100_000_000_000
   end
 
   def run
@@ -96,8 +98,8 @@ class Sim
     puts ''
     puts "..coins in vault: #{print_number(@vault)}"
     puts "..coins in holding pool: #{print_number(@holding_pool)}"
-    puts "..coins in auction pool: #{print_number(@auction_pool)}"
     puts "..dollars in vault: #{print_money(dollars_in_vault)}"
+    puts "..dollars in reward pool: #{print_money(@reward_pool / 100.0)}"
     puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
     puts "week #{week + 1} finished"
     puts ''
@@ -125,14 +127,17 @@ class Sim
 
   def enact_agent_actions(week)
     puts '..enacting agent actions'
+    puts '....running auction'
+    pre_auction_vault = @pennies_in_vault
+    pennies_paid_out = Auction.new(coin_value_in_pennies, @agents, week).run_auction
+    @pennies_in_vault -= pennies_paid_out
+    reward_pool_payout = @pennies_in_vault - pre_auction_vault
+    @pennies_in_vault -= reward_pool_payout
+    @reward_pool += reward_pool_payout
+    puts "pennies_in_vault: #{print_money(@pennies_in_vault / 100.0)}"
+
     puts '....selling coins'
     enact_agent_sell_coins(week)
-
-    puts '....reinvesting coins'
-    enact_agent_reinvest_coins(week)
-
-    puts '....running auction'
-    Auction.new(@auction_pool, @agents).run_auction
 
     puts '..agent actions completed'
   end
@@ -150,19 +155,5 @@ class Sim
     @pennies_in_vault += coins_sold * coin_value_in_pennies * sell_penalty(0)
     @vault -= coins_sold
     @holding_pool += coins_sold
-  end
-
-  def enact_agent_reinvest_coins(week)
-    threads = []
-
-    @agents.each do |agent|
-      threads << Thread.new do
-        agent.reinvest_coins(week)
-      end
-    end
-
-    coins_reinvested = threads.map { |t| t.value }.sum
-    @vault -= coins_reinvested
-    @auction_pool += coins_reinvested
   end
 end

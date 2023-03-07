@@ -13,6 +13,10 @@ class Agent
     }
   end
 
+  def deposit_coins(coins)
+    @coins += coins
+  end
+
   def calculate_actions(week)
     coins_to_sell, coins_to_reinvest, coins_to_stake = get_randoms_summing_to(@coins, @action_odds.size, @action_odds.values)
     coins_to_buy = 0 # something??
@@ -27,12 +31,5 @@ class Agent
     @coins -= coins_to_sell
     @action_table[:coins_to_sell][week] = 0
     coins_to_sell
-  end
-
-  def reinvest_coins(week)
-    coins_to_reinvest = @action_table[:coins_to_reinvest][week]
-    @coins -= coins_to_reinvest
-    @action_table[:coins_to_reinvest][week] = 0
-    coins_to_reinvest
   end
 end
