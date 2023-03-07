@@ -4,14 +4,19 @@ require 'random_variate_generator'
 require_relative 'util'
 require_relative 'agent'
 require_relative 'auction'
+require_relative 'vault'
 
 class Sim
   ################ EDIT BELOW ###########################
 
   # total number of coins in existence
-  # use the large number for the real sim. 1_000 is turned on for testing purposes
+  # use the large number for the real sim. 1_000_000 is turned on for testing purposes
+  #
   # AA_COINS = 1_000_000_000.freeze
   AA_COINS = 1_000_000.freeze
+
+  # total amount of starting cash in pennies
+  START_CASH = 100_000_000.freeze
 
   # odds that a given coin owned by an agent will be subject to a given action
   ACTIONS = {
@@ -24,18 +29,17 @@ class Sim
   ACTION_WEEKS_MAX = 50.freeze
 
   # number of weeks to run the sim
-  WEEKS_MAX = 2.freeze
+  WEEKS_MAX = 100.freeze
 
   ################ DO NOT EDIT BELOW ####################
 
   def initialize
+    @vault = Vault.new(AA_COINS.dup, START_CASH.dup)
+
     # coin accounts
-    @vault = AA_COINS.dup
-    @coins_allocated_to_users = 0
     @holding_pool = 0
 
     # cash accounts
-    @pennies_in_vault = 100_000_000_000
     @reward_pool = 0
 
     @agents = []
@@ -53,35 +57,22 @@ class Sim
     10 * ((1 / 1.0471285481) ** weeks)
   end
 
-  def dollars_in_vault
-    '%0.02f' % (@pennies_in_vault / 100.0).round(2)
-  end
-
-  def coin_value_in_pennies
-    (@pennies_in_vault / AA_COINS).round(0)
-  end
-
-  def coin_value_in_dollars
-    '%0.02f' % (coin_value_in_pennies / 100.0).round(2)
-  end
-
   def initiate_agents
     puts 'initiating agents...'
 
-    while @coins_allocated_to_users < @vault do
-      coins_remaining = @vault - @coins_allocated_to_users
+    coins_allocated = 0
+
+    while coins_allocated < @vault.coins do
+      coins_remaining = @vault.coins - coins_allocated
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
-      @coins_allocated_to_users += coins_to_allocate
+      coins_allocated += coins_to_allocate
 
       @agents.push(Agent.new(coins_to_allocate, ACTIONS))
     end
-
-    puts "#{@agents.size} agents initiated"
   end
 
   def process_weeks
-    puts "dollars in vault: #{print_money(dollars_in_vault)}"
-    puts "AA Coin value: #{print_money(coin_value_in_dollars)}"
+    puts "#{@vault}"
     puts ''
     puts "running for #{WEEKS_MAX} weeks..."
 
@@ -96,15 +87,13 @@ class Sim
     puts ''
     enact_agent_actions(week)
     puts ''
-    puts "..coins in vault: #{print_number(@vault)}"
+    puts "..vault: #{@vault}"
     puts "..coins in holding pool: #{print_number(@holding_pool)}"
-    puts "..dollars in vault: #{print_money(dollars_in_vault)}"
-    puts "..dollars in reward pool: #{print_money(@reward_pool / 100.0)}"
-    puts "..AA Coin value: #{print_money(coin_value_in_dollars)}"
+    puts "..dollars in reward pool: $#{print_number('%0.02f' % (@reward_pool / 100.0).round(2))}"
     puts "week #{week + 1} finished"
     puts ''
 
-    if @vault == 0
+    if @vault.coins == 0 || @vault.cash == 0
       puts "VAULT WENT TO ZERO!"
       exit
     end
@@ -128,13 +117,11 @@ class Sim
   def enact_agent_actions(week)
     puts '..enacting agent actions'
     puts '....running auction'
-    pre_auction_vault = @pennies_in_vault
-    pennies_paid_out = Auction.new(coin_value_in_pennies, @agents, week).run_auction
-    @pennies_in_vault -= pennies_paid_out
-    reward_pool_payout = @pennies_in_vault - pre_auction_vault
-    @pennies_in_vault -= reward_pool_payout
+    pre_auction_vault = @vault.cash
+    pennies_paid_out = Auction.new(@vault, @agents, week).run_auction
+    reward_pool_payout = @vault.cash - pre_auction_vault
+    @vault.debit_cash(reward_pool_payout)
     @reward_pool += reward_pool_payout
-    puts "pennies_in_vault: #{print_money(@pennies_in_vault / 100.0)}"
 
     puts '....selling coins'
     enact_agent_sell_coins(week)
@@ -152,8 +139,8 @@ class Sim
     end
 
     coins_sold = threads.map { |t| t.value }.sum
-    @pennies_in_vault += coins_sold * coin_value_in_pennies * sell_penalty(0)
-    @vault -= coins_sold
+    @vault.credit_cash(coins_sold * @vault.coin_value * sell_penalty(0))
+    @vault.debit_coins(coins_sold)
     @holding_pool += coins_sold
   end
 end
