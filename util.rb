@@ -17,8 +17,8 @@ def get_randoms_summing_to(target_sum, num_randoms, dist = Array.new(num_randoms
       normalized.push(rand(0..dist[i]))
     end
 
-    normalized_sum = normalized.sum
-    denormalized = normalized.map { |n| (target_sum * (n / normalized_sum)).round }
+    next if normalized.sum == 0
+    denormalized = normalized.map { |n| (target_sum * (n / normalized.sum)).round }
   end
 
   if orig_num_randoms != num_randoms

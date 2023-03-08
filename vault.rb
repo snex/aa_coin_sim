@@ -26,13 +26,13 @@ class Vault
   def xfer_coins(debit_account, credit_account, coins)
     @coin_accounts[debit_account].debit(coins)
     @coin_accounts[credit_account].credit(coins)
-    puts "xfer #{print_number(coins)} from #{debit_account} to #{credit_account}"
+    #puts "xfer #{print_number(coins)} from #{debit_account} to #{credit_account}"
   end
 
   def xfer_cash(debit_account, credit_account, pennies)
     @cash_accounts[debit_account].debit(pennies)
     @cash_accounts[credit_account].credit(pennies)
-    puts "xfer #{print_number(pennies)} from #{debit_account} to #{credit_account}"
+    #puts "xfer #{print_number(pennies)} from #{debit_account} to #{credit_account}"
   end
 
   def coin_value
