@@ -15,6 +15,14 @@ class TestSim
   end
 
   def run
+    run_auction_test
+  end
+
+  private
+
+  def run_auction_test
+    puts "RUNNING AUCTION TEST"
+    puts ''
     puts @vault
     puts ''
     @agents.each { |a| a.calculate_actions(0) }
@@ -24,10 +32,13 @@ class TestSim
     puts ''
     puts @vault
 
-    # agents should have the following in their coin accounts
-    # 135, 90, 180
-    # and the following in their cash accounts
-    # $1.50, $1.00, $2.00
-    # reward pool should have $0.50
+    puts ''
+    puts 'agents should have the following in their coin accounts'
+    puts '135, 90, 180'
+    puts 'and the following in their cash accounts'
+    puts '$1.50, $1.00, $2.00 (currently all customer payouts are in 1 bucket called customer_payouts)'
+    puts 'reward pool should have $0.50'
+    puts ''
+    puts 'FINISHED AUCTION TEST'
   end
 end
