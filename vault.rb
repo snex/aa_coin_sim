@@ -44,7 +44,7 @@ class Vault
   end
 
   def total_cash
-    @cash_accounts.reject { |k,v| customer_accounts.include?(k) }.values.map(&:pennies).sum
+    aa_cash_accounts.values.map(&:pennies).sum
   end
 
   def total_cash_dollars
@@ -52,14 +52,25 @@ class Vault
   end
 
   def to_s
+    "Coin Accounts\n" +
+    '=' * 45 + "\n" +
     @coin_accounts.map do |k,v|
       "#{k.to_s.rjust(20)}: #{v}\n"
     end.join +
-    "Total:".rjust(21) + "∀#{print_number(total_coins)}\n\n".rjust(23) +
-    @cash_accounts.map do |k,v|
+    '=' * 45 + "\n" +
+    "Total:".rjust(21) + "∀#{print_number(total_coins)}\n\n".rjust(26) +
+    "AA Cash Accounts\n" +
+    '=' * 45 + "\n" +
+    aa_cash_accounts.map do |k,v|
       "#{k.to_s.rjust(20)}: #{v}\n"
     end.join +
+    '=' * 45 + "\n" +
     "Total:".rjust(21) + "$#{print_number(total_cash_dollars)}\n\n".rjust(26) +
+    "Customer Cash Accounts\n" +
+    '=' * 45 + "\n" +
+    customer_cash_accounts.map do |k,v|
+      "#{k.to_s.rjust(20)}: #{v}\n"
+    end.join + "\n" +
     "Coin Price:".rjust(21) + "$#{print_number(coin_value_dollars)}".rjust(24) + "/coin"
   end
 
@@ -71,6 +82,14 @@ class Vault
 
   def customer_accounts
     [:customer_payouts, :customer_purchases]
+  end
+
+  def customer_cash_accounts
+    @cash_accounts.select { |k,v| customer_accounts.include?(k) }
+  end
+
+  def aa_cash_accounts
+    @cash_accounts.reject { |k,v| customer_accounts.include?(k) }
   end
 end
 
@@ -90,7 +109,7 @@ class CoinAccount
   end
 
   def to_s
-    "∀#{print_number(@coins)}".rjust(20)
+    "∀#{print_number(@coins)}".rjust(23)
   end
 end
 
