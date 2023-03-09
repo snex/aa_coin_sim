@@ -2,6 +2,10 @@ def print_number(num)
   num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
 end
 
+def sell_penalty(weeks)
+  (10 * ((1 / 1.0471285481) ** weeks) / 100.0)
+end
+
 def get_randoms_summing_to(target_sum, num_randoms, dist = Array.new(num_randoms, 1.0))
   denormalized = []
   orig_num_randoms = num_randoms

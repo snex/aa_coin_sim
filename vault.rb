@@ -36,6 +36,7 @@ class Vault
   end
 
   def coin_value
+    return 0 if @cash_accounts[:cash_vault].pennies.zero? || @coin_accounts[:coin_vault].coins.zero?
     @cash_accounts[:cash_vault].pennies / @coin_accounts[:coin_vault].coins
   end
 

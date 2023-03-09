@@ -46,10 +46,6 @@ class Sim
 
   private
 
-  def sell_penalty(weeks)
-    (10 * ((1 / 1.0471285481) ** weeks) / 100.0)
-  end
-
   def initiate_agents
     puts 'initiating agents...'
 
@@ -60,7 +56,7 @@ class Sim
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
       coins_allocated += coins_to_allocate
 
-      @agents.push(Agent.new(coins_to_allocate, ACTIONS))
+      @agents.push(Agent.new(coins_to_allocate, ACTIONS, @vault))
     end
   end
 
@@ -93,15 +89,10 @@ class Sim
 
   def calculate_agent_actions(week)
     puts '..calculating agent actions'
-    threads = []
 
     @agents.each_with_index do |agent, i|
-      threads << Thread.new do
-        agent.calculate_actions(week)
-      end
+      agent.calculate_actions(week)
     end
-
-    threads.map(&:join)
 
     puts '..agent actions calculated'
   end
@@ -118,20 +109,8 @@ class Sim
   end
 
   def enact_agent_sell_coins(week)
-    threads = []
-
     @agents.each do |agent|
-      threads << Thread.new do
-        agent.sell_coins(week)
-      end
+      agent.sell_coins(week)
     end
-
-    coins_sold = threads.map { |t| t.value }.sum
-    sell_amt = (coins_sold * @vault.coin_value).to_i
-    amt_to_customer = (sell_amt * (1 - sell_penalty(0))).to_i
-    amt_to_reward_pool = sell_amt - amt_to_customer
-    @vault.xfer_cash(:cash_vault, :customer_payouts, amt_to_customer)
-    @vault.xfer_cash(:cash_vault, :reward_pool, amt_to_reward_pool)
-    @vault.xfer_coins(:coin_vault, :holding_pool, coins_sold)
   end
 end
