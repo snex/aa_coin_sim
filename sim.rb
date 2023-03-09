@@ -89,11 +89,15 @@ class Sim
 
   def calculate_agent_actions(week)
     puts '..calculating agent actions'
+    threads = []
 
     @agents.each_with_index do |agent, i|
-      agent.calculate_actions(week)
+      threads << Thread.new do
+        agent.calculate_actions(week)
+      end
     end
 
+    threads.map(&:join)
     puts '..agent actions calculated'
   end
 
@@ -101,16 +105,23 @@ class Sim
     puts '..enacting agent actions'
     puts '....running auction'
     Auction.new(@vault, @agents, week).run_auction
-
-    puts '....selling coins'
+    puts '....auction complete'
     enact_agent_sell_coins(week)
-
     puts '..agent actions completed'
   end
 
   def enact_agent_sell_coins(week)
+    puts '....selling coins'
+    semaphore = Thread::Mutex.new
+    threads = []
+
     @agents.each do |agent|
-      agent.sell_coins(week)
+      threads << Thread.new do
+        agent.sell_coins(week, semaphore)
+      end
     end
+
+    threads.map(&:join)
+    puts '....finished selling coins'
   end
 end
