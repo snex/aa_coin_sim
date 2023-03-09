@@ -8,10 +8,7 @@ class Vault
     }
     @cash_accounts = {
       cash_vault:         CashAccount.new(cash),
-      reward_pool:        CashAccount.new(0),
-      # for the purpose of the sim, these can all be one giant bucket
-      customer_payouts:   CashAccount.new(0),
-      customer_purchases: CashAccount.new(Float::INFINITY)
+      reward_pool:        CashAccount.new(0)
     }
   end
 
@@ -24,14 +21,32 @@ class Vault
   end
 
   def xfer_coins(debit_account, credit_account, coins)
-    @coin_accounts[debit_account].debit(coins)
-    @coin_accounts[credit_account].credit(coins)
+    if debit_account.is_a?(Symbol)
+      @coin_accounts[debit_account].debit(coins)
+    else
+      debit_account.debit(coins)
+    end
+
+    if credit_account.is_a?(Symbol)
+      @coin_accounts[credit_account].credit(coins)
+    else
+      credit_account.credit(coins)
+    end
     #puts "xfer #{print_number(coins)} from #{debit_account} to #{credit_account}"
   end
 
   def xfer_cash(debit_account, credit_account, pennies)
-    @cash_accounts[debit_account].debit(pennies)
-    @cash_accounts[credit_account].credit(pennies)
+    if debit_account.is_a?(Symbol)
+      @cash_accounts[debit_account].debit(pennies)
+    else
+      debit_account.debit(pennies)
+    end
+
+    if credit_account.is_a?(Symbol)
+      @cash_accounts[credit_account].credit(pennies)
+    else
+      credit_account.credit(pennies)
+    end
     #puts "xfer #{print_number(pennies)} from #{debit_account} to #{credit_account}"
   end
 
@@ -45,7 +60,7 @@ class Vault
   end
 
   def total_cash
-    aa_cash_accounts.values.map(&:pennies).sum
+    @cash_accounts.values.map(&:pennies).sum
   end
 
   def total_cash_dollars
@@ -53,44 +68,27 @@ class Vault
   end
 
   def to_s
-    "Coin Accounts\n" +
-    '=' * 45 + "\n" +
-    @coin_accounts.map do |k,v|
-      "#{k.to_s.rjust(20)}: #{v}\n"
-    end.join +
-    '=' * 45 + "\n" +
-    "Total:".rjust(21) + "∀#{print_number(total_coins)}\n\n".rjust(26) +
-    "AA Cash Accounts\n" +
-    '=' * 45 + "\n" +
-    aa_cash_accounts.map do |k,v|
-      "#{k.to_s.rjust(20)}: #{v}\n"
-    end.join +
-    '=' * 45 + "\n" +
-    "Total:".rjust(21) + "$#{print_number(total_cash_dollars)}\n\n".rjust(26) +
-    "Customer Cash Accounts\n" +
-    '=' * 45 + "\n" +
-    customer_cash_accounts.map do |k,v|
-      "#{k.to_s.rjust(20)}: #{v}\n"
-    end.join + "\n" +
-    "Coin Price:".rjust(21) + "$#{print_number(coin_value_dollars)}".rjust(24) + "/coin"
+    %{
+Coin Accounts
+#{'=' * 45}
+#{@coin_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v}\n" }.join}
+#{'=' * 45}
+#{"Total:".rjust(21)} #{"∀#{print_number(total_coins)}\n".rjust(24)}
+
+AA Cash Accounts
+#{'=' * 45}
+#{@cash_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v}\n" }.join}
+#{'=' * 45}
+#{'Total:'.rjust(21) + "$#{print_number(total_cash_dollars)}".rjust(24)}
+
+#{'Coin Price:'.rjust(21) + "$#{print_number(coin_value_dollars)}".rjust(24) + "/coin"}
+    }
   end
 
   private
 
   def coin_value_dollars
     '%0.02f' % (coin_value / 100.0).round(2)
-  end
-
-  def customer_accounts
-    [:customer_payouts, :customer_purchases]
-  end
-
-  def customer_cash_accounts
-    @cash_accounts.select { |k,v| customer_accounts.include?(k) }
-  end
-
-  def aa_cash_accounts
-    @cash_accounts.reject { |k,v| customer_accounts.include?(k) }
   end
 end
 

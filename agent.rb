@@ -1,10 +1,11 @@
 require_relative 'util'
 
 class Agent
-  attr_reader :coins, :action_table
+  attr_reader :coins, :cash, :action_table
 
   def initialize(coins, action_odds, vault)
-    @coins = coins
+    @coins = CoinAccount.new(coins)
+    @cash = CashAccount.new(0)
     @action_odds = action_odds
     @vault = vault
     @action_table = {
@@ -15,15 +16,15 @@ class Agent
   end
 
   def deposit_coins(coins)
-    @coins += coins
+    @coins.credit(coins)
   end
 
   def remove_coins(coins)
-    @coins -= coins
+    @coins.debit(coins)
   end
 
   def calculate_actions(week)
-    coins_to_sell, coins_to_reinvest, coins_to_stake = get_randoms_summing_to(@coins, @action_odds.size, @action_odds.values)
+    coins_to_sell, coins_to_reinvest, coins_to_stake = get_randoms_summing_to(@coins.coins, @action_odds.size, @action_odds.values)
     coins_to_buy = 0 # something??
 
     @action_table[:coins_to_sell][week] = coins_to_sell
@@ -40,7 +41,7 @@ class Agent
     amt_to_reward_pool = sell_amt - amt_to_customer
 
     semaphore.lock if semaphore
-    @vault.xfer_cash(:cash_vault, :customer_payouts, amt_to_customer)
+    @vault.xfer_cash(:cash_vault, @cash, amt_to_customer)
     @vault.xfer_cash(:cash_vault, :reward_pool, amt_to_reward_pool)
     @vault.xfer_coins(:coin_vault, :holding_pool, coins_to_sell)
     semaphore.unlock if semaphore

@@ -36,7 +36,15 @@ class TestSim
       @agents.each { |a| a.calculate_actions(0) }
       @agents.each { |a| a.sell_coins(0) }
       puts "Agent Coins"
-      puts @agents.map { |a| a.coins }.inspect
+      @agents.each_with_index do |a, i|
+        puts "Agent #{i}: #{a.coins}"
+      end
+
+      puts "Agent Cash"
+      @agents.each_with_index do |a, i|
+        puts "Agent #{i}: #{a.cash}"
+      end
+
       puts ''
       puts @vault
 
@@ -44,7 +52,7 @@ class TestSim
       puts 'agents should have the following in their coin accounts'
       puts '0'
       puts 'and the following in their cash accounts'
-      puts '$0.90 (currently all customer payouts are in 1 bucket called customer_payouts)'
+      puts '$0.90'
       puts ''
       puts 'holding pool should have 100 coins'
       puts 'reward pool should have $0.10'
@@ -77,7 +85,15 @@ class TestSim
       @agents.each { |a| a.calculate_actions(0) }
       Auction.new(@vault, @agents, 0).run_auction(500)
       puts "Agent Coins"
-      puts @agents.map { |a| a.coins }.inspect
+      @agents.each_with_index do |a, i|
+        puts "Agent #{i}: #{a.coins}"
+      end
+
+      puts "Agent Cash"
+      @agents.each_with_index do |a, i|
+        puts "Agent #{i}: #{a.cash}"
+      end
+
       puts ''
       puts @vault
 
@@ -85,7 +101,7 @@ class TestSim
       puts 'agents should have the following in their coin accounts'
       puts '135, 90, 180'
       puts 'and the following in their cash accounts'
-      puts '$1.50, $1.00, $2.00 (currently all customer payouts are in 1 bucket called customer_payouts)'
+      puts '$1.50, $1.00, $2.00'
       puts ''
       puts 'reward pool should have $0.50'
       puts ''
