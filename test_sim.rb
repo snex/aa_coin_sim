@@ -35,14 +35,10 @@ class TestSim
       puts ''
       @agents.each { |a| a.calculate_actions(0) }
       @agents.each { |a| a.sell_coins(0) }
-      puts "Agent Coins"
-      @agents.each_with_index do |a, i|
-        puts "Agent #{i}: #{a.coins}"
-      end
 
-      puts "Agent Cash"
       @agents.each_with_index do |a, i|
-        puts "Agent #{i}: #{a.cash}"
+        puts "Agent #{i}"
+        puts a
       end
 
       puts ''
@@ -85,19 +81,10 @@ class TestSim
       puts ''
       @agents.each { |a| a.calculate_actions(0) }
       Auction.new(@vault, @agents, 0).run_auction(1.0 / 9.0)
-      puts "Agent Coins"
-      @agents.each_with_index do |a, i|
-        puts "Agent #{i}: #{a.coins}"
-      end
 
-      puts "Agent Cash"
       @agents.each_with_index do |a, i|
-        puts "Agent #{i}: #{a.cash}"
-      end
-
-      puts "Agent REI Tokens"
-      @agents.each_with_index do |a, i|
-        puts "Agent #{i}: #{a.rei_tokens}"
+        puts "Agent #{i}"
+        puts a
       end
 
       puts ''

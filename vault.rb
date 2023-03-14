@@ -72,13 +72,13 @@ class Vault
     %{
 Coin Accounts
 #{'=' * 45}
-#{@coin_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v}\n" }.join}
+#{@coin_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v.to_s.rjust(23)}\n" }.join}
 #{'=' * 45}
-#{"Total:".rjust(21)} #{"∀#{print_number(total_coins)}\n".rjust(24)}
+#{"Total:".rjust(21)} #{"∀#{print_number(total_coins)}".rjust(23)}
 
 AA Cash Accounts
 #{'=' * 45}
-#{@cash_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v}\n" }.join}
+#{@cash_accounts.map { |k,v| "#{k.to_s.rjust(20)}: #{v.to_s.rjust(23)}\n" }.join}
 #{'=' * 45}
 #{'Total:'.rjust(21) + "$#{print_number(total_cash_dollars)}".rjust(24)}
 
@@ -109,7 +109,7 @@ class CoinAccount
   end
 
   def to_s
-    "∀#{print_number(@coins)}".rjust(23)
+    "∀#{print_number(@coins)}"
   end
 end
 
@@ -133,7 +133,7 @@ class CashAccount
   end
 
   def to_s
-    "$#{print_number(dollars)}".rjust(23)
+    "$#{print_number(dollars)}"
   end
 end
 
@@ -153,6 +153,6 @@ class REIAccount
   end
 
   def to_s
-    "REI #{print_number(@tokens)}".rjust(23)
+    "REI #{print_number(@tokens)}"
   end
 end

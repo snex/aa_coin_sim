@@ -58,4 +58,12 @@ class Agent
     @vault.xfer_coins(:coin_vault, :holding_pool, coins_to_sell)
     semaphore.unlock if semaphore
   end
+
+  def to_s
+    %{#{'=' * 45}
+#{'Coins:'.rjust(21)} #{@coins.to_s.rjust(23)}
+#{'Cash:'.rjust(21)} #{@cash.to_s.rjust(23)}
+#{'REI Tokens:'.rjust(21)} #{@rei_tokens.to_s.rjust(23)}
+    }
+  end
 end
