@@ -43,7 +43,6 @@ class TestSim
 
       puts ''
       puts @vault
-
       puts ''
       puts 'agents should have the following in their coin accounts'
       puts '0'
@@ -89,7 +88,6 @@ class TestSim
 
       puts ''
       puts @vault
-
       puts ''
       puts 'agents should have the following in their coin accounts'
       puts '135, 90, 180, 45'

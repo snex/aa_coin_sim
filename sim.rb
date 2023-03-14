@@ -25,6 +25,8 @@ class Sim
     stake:    0.65
   }.freeze
 
+  # percentage of the total value of coins up for auction that buyers are willing to bid
+  # likely will be replaced by a mean and a stddev for plugging into normal distribution
   BUY_PRESSURE = (0.005..0.05).freeze
 
   # the number of weeks somebody can commit to in the future
