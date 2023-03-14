@@ -43,6 +43,7 @@ class Agent
 
   def sell_coins(week, semaphore = nil)
     coins_to_sell = @action_table[:coins_to_sell][week]
+    return if coins_to_sell.nil?
     remove_coins(coins_to_sell)
     @action_table[:coins_to_sell][week] = 0
     sell_amt = (coins_to_sell * @vault.coin_value).to_i
@@ -60,8 +61,7 @@ class Agent
   end
 
   def to_s
-    %{#{'=' * 45}
-#{'Coins:'.rjust(21)} #{@coins.to_s.rjust(23)}
+    %{#{'Coins:'.rjust(21)} #{@coins.to_s.rjust(23)}
 #{'Cash:'.rjust(21)} #{@cash.to_s.rjust(23)}
 #{'REI Tokens:'.rjust(21)} #{@rei_tokens.to_s.rjust(23)}
     }

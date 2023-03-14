@@ -17,9 +17,8 @@ class TestSim
   class SellSim
     def initialize
       @vault = Vault.new(100, 100)
-      @agents = [
-        Agent.new(100, 0, { sell: 1, reinvest: 0, stake: 0 }, @vault)
-      ]
+      @agents = AgentSet.new
+      @agents.add_agent(100, 0, { sell: 1, reinvest: 0, stake: 0 }, @vault)
     end
 
     def run
@@ -33,14 +32,9 @@ class TestSim
       puts ''
       puts @vault
       puts ''
-      @agents.each { |a| a.calculate_actions(0) }
-      @agents.each { |a| a.sell_coins(0) }
-
-      @agents.each_with_index do |a, i|
-        puts "Agent #{i}"
-        puts a
-      end
-
+      @agents.each { |i, a| a.calculate_actions(0) }
+      @agents.each { |i, a| a.sell_coins(0) }
+      puts @agents
       puts ''
       puts @vault
       puts ''
@@ -60,11 +54,10 @@ class TestSim
   class AuctionSim
     def initialize
       @vault = Vault.new(450, 4_500)
-      @agents = [
-        Agent.new(150, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
-        Agent.new(100, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
-        Agent.new(200, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
-      ]
+      @agents = AgentSet.new
+      @agents.add_agent(150, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
+      @agents.add_agent(100, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
+      @agents.add_agent(200, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
     end
 
     def run
@@ -78,14 +71,16 @@ class TestSim
       puts ''
       puts @vault
       puts ''
-      @agents.each { |a| a.calculate_actions(0) }
-      Auction.new(@vault, @agents, 0).run_auction(1.0 / 9.0)
+      @agents.each { |i, a| a.calculate_actions(0) }
 
-      @agents.each_with_index do |a, i|
-        puts "Agent #{i}"
-        puts a
-      end
+      Auction.new(@vault, @agents, 0).run_auction(450, 500)
 
+      buyer = @agents.add_agent(0, 500, {}, @vault)
+      @vault.xfer_cash(buyer.cash, :cash_vault, 500)
+      @vault.xfer_cash(:cash_vault, :reward_pool, 50)
+      buyer.deposit_coins(45)
+
+      puts @agents
       puts ''
       puts @vault
       puts ''
