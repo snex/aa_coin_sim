@@ -3,12 +3,11 @@ require_relative 'util'
 class Agent
   attr_reader :coins, :cash, :rei_tokens, :action_table
 
-  def initialize(coins, cash, action_odds, vault)
+  def initialize(coins, cash, action_odds)
     @coins = CoinAccount.new(coins)
     @cash = CashAccount.new(cash)
     @rei_tokens = REIAccount.new(0)
     @action_odds = action_odds
-    @vault = vault
     @action_table = {
       coins_to_sell: {},
       coins_to_reinvest: {},
@@ -41,22 +40,22 @@ class Agent
     @action_table[:coins_to_buy][week] = coins_to_buy
   end
 
-  def sell_coins(week, semaphore = nil)
+  def sell_coins(week, vault, semaphore = nil)
     coins_to_sell = @action_table[:coins_to_sell][week]
     return if coins_to_sell.nil?
     remove_coins(coins_to_sell)
     @action_table[:coins_to_sell][week] = 0
-    sell_amt = (coins_to_sell * @vault.coin_value).to_i
+    sell_amt = (coins_to_sell * vault.coin_value).to_i
     amt_to_customer = (sell_amt * (1 - sell_penalty(0))).to_i
     amt_to_vault = sell_amt - amt_to_customer
     # make sure this adds up!
     amt_to_reward_pool = amt_to_reinvest_pool = amt_to_vault.to_f / 2
 
     semaphore.lock if semaphore
-    @vault.xfer_cash(:cash_vault, @cash, amt_to_customer)
-    @vault.xfer_cash(:cash_vault, :reward_pool, amt_to_reward_pool)
-    @vault.xfer_cash(:cash_vault, :reinvest_pool, amt_to_reinvest_pool)
-    @vault.xfer_coins(:coin_vault, :holding_pool, coins_to_sell)
+    vault.xfer_cash(:cash_vault, @cash, amt_to_customer)
+    vault.xfer_cash(:cash_vault, :reward_pool, amt_to_reward_pool)
+    vault.xfer_cash(:cash_vault, :reinvest_pool, amt_to_reinvest_pool)
+    vault.xfer_coins(:coin_vault, :holding_pool, coins_to_sell)
     semaphore.unlock if semaphore
   end
 

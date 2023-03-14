@@ -61,7 +61,7 @@ class Sim
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
       coins_allocated += coins_to_allocate
 
-      @agents.add_agent(coins_to_allocate, 0, ACTIONS, @vault)
+      @agents.add_agent(coins_to_allocate, 0, ACTIONS)
     end
   end
 
@@ -94,15 +94,7 @@ class Sim
 
   def calculate_agent_actions(week)
     puts '..calculating agent actions'
-    threads = []
-
-    @agents.each do |id, agent|
-      threads << Thread.new do
-        agent.calculate_actions(week)
-      end
-    end
-
-    threads.map(&:join)
+    @agents.calculate_actions(week)
     puts '..agent actions calculated'
   end
 
@@ -111,15 +103,15 @@ class Sim
     puts '....running auction'
 
     pre_auction_vault_cash = @vault.cash
-    coins_at_auction = @agents.map { |id, agent| agent.action_table[:coins_to_reinvest][week] }.sum
+    coins_at_auction = @agents.coins_at_auction(week)
     buyer_bid_amount = (rand(BUY_PRESSURE) * @vault.coin_value * coins_at_auction).to_i
 
     Auction.new(@vault, @agents, week).run_auction(coins_at_auction, buyer_bid_amount)
 
-    buyer = @agents.add_agent(0, buyer_bid_amount, Sim::ACTIONS, @vault)
+    buyer = @agents.add_agent(0, buyer_bid_amount, ACTIONS)
     @vault.xfer_cash(buyer.cash, :cash_vault, buyer_bid_amount)
     @vault.xfer_cash(:cash_vault, :reward_pool, @vault.cash - pre_auction_vault_cash)
-    buyer.deposit_coins(@vault.coins - @agents.map { |id, agent| agent.coins }.map(&:coins).sum)
+    buyer.deposit_coins(@vault.coins - @agents.agents.map { |id, agent| agent.coins }.map(&:coins).sum)
 
     puts '....auction complete'
     enact_agent_sell_coins(week)
@@ -128,16 +120,7 @@ class Sim
 
   def enact_agent_sell_coins(week)
     puts '....selling coins'
-    semaphore = Thread::Mutex.new
-    threads = []
-
-    @agents.each do |id, agent|
-      threads << Thread.new do
-        agent.sell_coins(week, semaphore)
-      end
-    end
-
-    threads.map(&:join)
+    @agents.sell_coins(week, @vault)
     puts '....finished selling coins'
   end
 end

@@ -18,7 +18,7 @@ class TestSim
     def initialize
       @vault = Vault.new(100, 100)
       @agents = AgentSet.new
-      @agents.add_agent(100, 0, { sell: 1, reinvest: 0, stake: 0 }, @vault)
+      @agents.add_agent(100, 0, { sell: 1, reinvest: 0, stake: 0 })
     end
 
     def run
@@ -32,8 +32,8 @@ class TestSim
       puts ''
       puts @vault
       puts ''
-      @agents.each { |i, a| a.calculate_actions(0) }
-      @agents.each { |i, a| a.sell_coins(0) }
+      @agents.calculate_actions(0)
+      @agents.sell_coins(0, @vault)
       puts @agents
       puts ''
       puts @vault
@@ -55,9 +55,9 @@ class TestSim
     def initialize
       @vault = Vault.new(450, 4_500)
       @agents = AgentSet.new
-      @agents.add_agent(150, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
-      @agents.add_agent(100, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
-      @agents.add_agent(200, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault)
+      @agents.add_agent(150, 0, { sell: 0, reinvest: 1, stake: 0 })
+      @agents.add_agent(100, 0, { sell: 0, reinvest: 1, stake: 0 })
+      @agents.add_agent(200, 0, { sell: 0, reinvest: 1, stake: 0 })
     end
 
     def run
@@ -71,11 +71,11 @@ class TestSim
       puts ''
       puts @vault
       puts ''
-      @agents.each { |i, a| a.calculate_actions(0) }
+      @agents.calculate_actions(0)
 
       Auction.new(@vault, @agents, 0).run_auction(450, 500)
 
-      buyer = @agents.add_agent(0, 500, {}, @vault)
+      buyer = @agents.add_agent(0, 500, {})
       @vault.xfer_cash(buyer.cash, :cash_vault, 500)
       @vault.xfer_cash(:cash_vault, :reward_pool, 50)
       buyer.deposit_coins(45)

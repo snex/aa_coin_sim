@@ -12,7 +12,7 @@ class Auction
     pennies_reinvested = pre_auction_coin_value * coins_at_auction
     total_bid_amount = pennies_reinvested + buyer_bid_amount
 
-    @agents.each do |id, agent|
+    @agents.agents.each do |id, agent|
       coins_reinvested = agent.action_table[:coins_to_reinvest][@week]
       agent.remove_coins(coins_reinvested)
       coins_reinvested_value = coins_reinvested * pre_auction_coin_value
