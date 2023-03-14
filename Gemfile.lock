@@ -17,6 +17,7 @@ GEM
       ffi
 
 PLATFORMS
+  universal-java-1.8
   universal-java-14
   x86_64-linux
 

@@ -18,7 +18,7 @@ class TestSim
     def initialize
       @vault = Vault.new(100, 100)
       @agents = [
-        Agent.new(100, { sell: 1, reinvest: 0, stake: 0 }, @vault)
+        Agent.new(100, 0, { sell: 1, reinvest: 0, stake: 0 }, @vault)
       ]
     end
 
@@ -55,7 +55,8 @@ class TestSim
       puts '$0.90'
       puts ''
       puts 'holding pool should have 100 coins'
-      puts 'reward pool should have $0.10'
+      puts 'reward pool should have $0.05'
+      puts 'reinvest pool should have $0.05'
       puts ''
       puts 'FINISHED SELL TEST'
     end
@@ -65,9 +66,9 @@ class TestSim
     def initialize
       @vault = Vault.new(450, 4_500)
       @agents = [
-        Agent.new(150, { sell: 0, reinvest: 1, stake: 0 }, @vault),
-        Agent.new(100, { sell: 0, reinvest: 1, stake: 0 }, @vault),
-        Agent.new(200, { sell: 0, reinvest: 1, stake: 0 }, @vault),
+        Agent.new(150, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
+        Agent.new(100, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
+        Agent.new(200, 0, { sell: 0, reinvest: 1, stake: 0 }, @vault),
       ]
     end
 
@@ -83,7 +84,7 @@ class TestSim
       puts @vault
       puts ''
       @agents.each { |a| a.calculate_actions(0) }
-      Auction.new(@vault, @agents, 0).run_auction(500)
+      Auction.new(@vault, @agents, 0).run_auction(1.0 / 9.0)
       puts "Agent Coins"
       @agents.each_with_index do |a, i|
         puts "Agent #{i}: #{a.coins}"
@@ -94,14 +95,21 @@ class TestSim
         puts "Agent #{i}: #{a.cash}"
       end
 
+      puts "Agent REI Tokens"
+      @agents.each_with_index do |a, i|
+        puts "Agent #{i}: #{a.rei_tokens}"
+      end
+
       puts ''
       puts @vault
 
       puts ''
       puts 'agents should have the following in their coin accounts'
-      puts '135, 90, 180'
+      puts '135, 90, 180, 45'
       puts 'and the following in their cash accounts'
-      puts '$1.50, $1.00, $2.00'
+      puts '$1.50, $1.00, $2.00, $0.00'
+      puts 'and the following in their rei_token accounts'
+      puts '150, 100, 200, 0'
       puts ''
       puts 'reward pool should have $0.50'
       puts ''

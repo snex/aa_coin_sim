@@ -25,6 +25,8 @@ class Sim
     stake:    0.65
   }.freeze
 
+  BUY_PRESSURE = (0.005..0.05).freeze
+
   # the number of weeks somebody can commit to in the future
   ACTION_WEEKS_MAX = 50.freeze
 
@@ -40,6 +42,7 @@ class Sim
 
   def run
     initiate_agents
+    puts "created #{@agents.size} agents, running for #{WEEKS_MAX} weeks..."
     puts ''
     process_weeks
   end
@@ -56,7 +59,7 @@ class Sim
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
       coins_allocated += coins_to_allocate
 
-      @agents.push(Agent.new(coins_to_allocate, ACTIONS, @vault))
+      @agents.push(Agent.new(coins_to_allocate, 0, ACTIONS, @vault))
     end
   end
 
@@ -104,7 +107,8 @@ class Sim
   def enact_agent_actions(week)
     puts '..enacting agent actions'
     puts '....running auction'
-    Auction.new(@vault, @agents, week).run_auction
+    buyer = Auction.new(@vault, @agents, week).run_auction(rand(BUY_PRESSURE))
+    buyer.calculate_actions(week)
     puts '....auction complete'
     enact_agent_sell_coins(week)
     puts '..agent actions completed'

@@ -8,7 +8,8 @@ class Vault
     }
     @cash_accounts = {
       cash_vault:         CashAccount.new(cash),
-      reward_pool:        CashAccount.new(0)
+      reward_pool:        CashAccount.new(0),
+      reinvest_pool:      CashAccount.new(0)
     }
   end
 
@@ -133,5 +134,25 @@ class CashAccount
 
   def to_s
     "$#{print_number(dollars)}".rjust(23)
+  end
+end
+
+class REIAccount
+  attr_reader :tokens
+
+  def initialize(tokens)
+    @tokens = tokens
+  end
+
+  def credit(tokens)
+    @tokens += tokens
+  end
+
+  def debit(tokens)
+    @tokens -= tokens
+  end
+
+  def to_s
+    "REI #{print_number(@tokens)}".rjust(23)
   end
 end

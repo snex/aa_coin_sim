@@ -8,14 +8,14 @@ class Auction
   end
 
   # buyer bid amount will probably come from a set of objects rather than a param, but have it here for now
-  def run_auction(buyer_bid_amount = 0)
+  def run_auction(buy_pressure)
     pre_auction_vault_cash = @vault.cash
     pre_auction_coin_value = @vault.coin_value
 
     coins_at_auction = @agents.map { |agent| agent.action_table[:coins_to_reinvest][@week] }.sum
+    buyer_bid_amount = (buy_pressure * pre_auction_coin_value * coins_at_auction).to_i
 
-    buyer = CashAccount.new(buyer_bid_amount)
-    @vault.xfer_cash(buyer, :cash_vault, buyer_bid_amount)
+    buyer = Agent.new(0, buyer_bid_amount, Sim::ACTIONS, @vault)
 
     pennies_reinvested = pre_auction_coin_value * coins_at_auction
     total_bid_amount = pennies_reinvested + buyer_bid_amount
@@ -34,8 +34,16 @@ class Auction
       agent.action_table[:coins_to_reinvest][@week] = 0
       agent.deposit_coins(reinvested_coins_returned)
       @vault.xfer_cash(:cash_vault, agent.cash, payout_value)
+
+      # make sure these all add up to total vault coins
+      new_rei_tokens = coins_reinvested * (@vault.total_coins.to_f / coins_at_auction.to_f).round
+      agent.deposit_rei_tokens(new_rei_tokens)
     end
 
+    @agents.push(buyer)
+    @vault.xfer_cash(buyer.cash, :cash_vault, buyer_bid_amount)
     @vault.xfer_cash(:cash_vault, :reward_pool, @vault.cash - pre_auction_vault_cash)
+    buyer.deposit_coins(@vault.coins - @agents.map(&:coins).map(&:coins).sum)
+    buyer
   end
 end
