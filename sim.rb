@@ -77,9 +77,13 @@ class Sim
 
   def process_week(week)
     puts "week #{week + 1}"
-    calculate_agent_actions(week)
+    puts '..calculating agent actions'
+    @agents.calculate_actions(week)
+    puts '..agent actions calculated'
     puts ''
+    puts '..enacting agent actions'
     enact_agent_actions(week)
+    puts '..agent actions completed'
     puts ''
     puts "week #{week + 1} finished"
     puts ''
@@ -92,14 +96,7 @@ class Sim
     end
   end
 
-  def calculate_agent_actions(week)
-    puts '..calculating agent actions'
-    @agents.calculate_actions(week)
-    puts '..agent actions calculated'
-  end
-
   def enact_agent_actions(week)
-    puts '..enacting agent actions'
     puts '....running auction'
 
     pre_auction_vault_cash = @vault.cash
@@ -115,7 +112,6 @@ class Sim
 
     puts '....auction complete'
     enact_agent_sell_coins(week)
-    puts '..agent actions completed'
   end
 
   def enact_agent_sell_coins(week)

@@ -4,12 +4,16 @@ class Vault
   def initialize(coins, cash)
     @coin_accounts = {
       coin_vault:   CoinAccount.new(coins),
-      holding_pool: CoinAccount.new(0)
+      holding_pool: CoinAccount.new(0),
+      # temporary holding account for reinvested coins
+      auction_pool: CoinAccount.new(0)
     }
     @cash_accounts = {
       cash_vault:         CashAccount.new(cash),
       reward_pool:        CashAccount.new(0),
-      reinvest_pool:      CashAccount.new(0)
+      reinvest_pool:      CashAccount.new(0),
+      # temporary holding account for auctions
+      auction_pool:       CashAccount.new(0)
     }
   end
 
@@ -53,7 +57,7 @@ class Vault
 
   def coin_value
     return 0 if @cash_accounts[:cash_vault].pennies.zero? || @coin_accounts[:coin_vault].coins.zero?
-    @cash_accounts[:cash_vault].pennies / @coin_accounts[:coin_vault].coins
+    @cash_accounts[:cash_vault].pennies.to_r / @coin_accounts[:coin_vault].coins.to_r
   end
 
   def total_coins

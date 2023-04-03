@@ -40,9 +40,21 @@ class Agent
     @action_table[:coins_to_buy][week] = coins_to_buy
   end
 
+  def buy_at_auction(week, pre_auction_coin_value, total_bid_amount, semaphore = nil)
+  end
+
+  def reinvest_coins(week, vault, pre_auction_coin_value, total_bid_amount, semaphore = nil)
+    coins_to_reinvest = @action_table[:coins_to_reinvest][week]
+    return if coins_to_reinvest.nil? 
+
+    agent_pct = coins_to_reinvest * pre_auction_coin_value / total_bid_amount
+    puts "agent #{@id} pct: #{agent_pct}"
+  end
+
   def sell_coins(week, vault, semaphore = nil)
     coins_to_sell = @action_table[:coins_to_sell][week]
     return if coins_to_sell.nil?
+
     remove_coins(coins_to_sell)
     @action_table[:coins_to_sell][week] = 0
     sell_amt = (coins_to_sell * vault.coin_value).to_i

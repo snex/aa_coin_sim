@@ -7,6 +7,21 @@ class Auction
     @week = week
   end
 
+  def new_run_auction(coins_at_auction, buyer_bid_amount)
+    pre_auction_coin_value = @vault.coin_value
+    total_bid_amount = pre_auction_coin_value * coins_at_auction + buyer_bid_amount
+
+    @agents.reinvest_coins(@week, @vault, pre_auction_coin_value, total_bid_amount)
+    puts "reinvestor_pcts: #{reinvestor_pcts}"
+    puts "reinvestor_pct values: #{reinvestor_pcts.map(&:last).sum}"
+    all_pcts = reinvestor_pcts.map(&:last) << buyer_pct
+    puts "all_pcts: #{all_pcts}"
+    puts "splits: #{split_value(coins_at_auction, all_pcts)}"
+
+    all_pcts.each do |pct|
+    end
+  end
+
   def run_auction(coins_at_auction, buyer_bid_amount)
     pre_auction_coin_value = @vault.coin_value
     pennies_reinvested = pre_auction_coin_value * coins_at_auction

@@ -73,7 +73,7 @@ class TestSim
       puts ''
       @agents.calculate_actions(0)
 
-      Auction.new(@vault, @agents, 0).run_auction(450, 500)
+      Auction.new(@vault, @agents, 0).new_run_auction(450, 500)
 
       buyer = @agents.add_agent(0, 500, {})
       @vault.xfer_cash(buyer.cash, :cash_vault, 500)

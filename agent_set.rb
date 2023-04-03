@@ -41,6 +41,19 @@ class AgentSet
     threads.map(&:value).sum
   end
 
+  def sell_at_auction(week, pre_auction_coin_value, total_bid_amount)
+    threads = []
+    semaphore = Thread::Mutex.new
+
+    @agents.map do |id, agent|
+      threads << Thread.new do
+        agent.sell_at_auction(week, pre_auction_coin_value, total_bid_amount, semaphore)
+      end
+    end
+
+    threads.map(&:value)
+  end
+
   def sell_coins(week, vault)
     semaphore = Thread::Mutex.new
     threads = []
