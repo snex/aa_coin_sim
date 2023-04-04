@@ -7,10 +7,11 @@ class Vault
       holding_pool: CoinAccount.new(0)
     }
     @cash_accounts = {
-      cash_vault:         CashAccount.new(cash),
-      reward_pool:        CashAccount.new(0),
-      reinvest_pool:      CashAccount.new(0),
-      aa_holding_pool:    CashAccount.new(0)
+      cash_vault:          CashAccount.new(cash),
+      reward_pool:         CashAccount.new(0),
+      reinvest_pool:       CashAccount.new(0),
+      aa_holding_pool:     CashAccount.new(0),
+      promise_to_buy_pool: CashAccount.new(0)
     }
   end
 

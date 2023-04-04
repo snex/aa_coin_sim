@@ -44,6 +44,9 @@ class Sim
   # percent of aa_holding_pool to flow into cash_vault each week
   AA_HOLDING_POOL_TO_CASH_VAULT_PERCENT = 0.01
 
+  # percent of reward_pool to flow into promise_to_buy_pool each week
+  REWARD_POOL_TO_PROMISE_TO_BUY_POOL_PERCENT = 0.01
+
   ################ DO NOT EDIT BELOW ####################
 
   def initialize
@@ -144,7 +147,10 @@ class Sim
     puts '..agent actions completed'
 
     puts '..adjusting accounts'
-    @vault.xfer_cash(:reward_pool, :aa_holding_pool, (@vault.cash(:reward_pool) * REWARD_POOL_TO_AA_HOLDING_POOL_PERCENT).round)
+    cash_to_aa_holding_pool = (@vault.cash(:reward_pool) * REWARD_POOL_TO_AA_HOLDING_POOL_PERCENT).round 
+    cash_to_promise_to_buy_pool = (@vault.cash(:reward_pool) * REWARD_POOL_TO_PROMISE_TO_BUY_POOL_PERCENT).round
+    @vault.xfer_cash(:reward_pool, :aa_holding_pool, cash_to_aa_holding_pool)
+    @vault.xfer_cash(:reward_pool, :promise_to_buy_pool, cash_to_promise_to_buy_pool)
     @vault.xfer_cash(:aa_holding_pool, :cash_vault, (@vault.cash(:aa_holding_pool) * AA_HOLDING_POOL_TO_CASH_VAULT_PERCENT).round)
     puts '..adjusting accounts complete'
   end
