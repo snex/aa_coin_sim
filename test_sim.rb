@@ -9,9 +9,50 @@ class TestSim
   end
 
   def run
+    BuySim.new.run
+    puts ''
     AuctionSim.new.run
     puts ''
     SellSim.new.run
+  end
+
+  class BuySim
+    def initialize
+      @vault = Vault.new(101, 10_000)
+      @vault.xfer_coins(:coin_vault, :holding_pool, 1)
+      @agents = AgentSet.new
+      @agents.add_agent(100, 110, [])
+    end
+
+    def run
+      run_buy_test
+    end
+
+    private
+
+    def run_buy_test
+      puts "RUNNING BUY TEST"
+      puts ''
+      puts @vault
+      puts ''
+      @agents.get_random_agent.buy_coins(@vault, 0.10)
+      puts @agents
+      puts ''
+      puts @vault
+      puts ''
+      puts 'agents should have the following in their coin accounts'
+      puts '101'
+      puts 'and the following in their cash accounts'
+      puts '$0.00'
+      puts ''
+      puts 'coin_vault should have 101 coins'
+      puts 'holding pool should have 0 coins'
+      puts 'cash_vault should have $101.00'
+      puts 'reward pool should have $0.10'
+      puts 'reinvest pool should have $0.00'
+      puts ''
+      puts 'FINISHED BUY TEST'
+    end
   end
 
   class SellSim

@@ -12,6 +12,10 @@ class AgentSet
     @agents.size
   end
 
+  def get_random_agent
+    @agents[@agents.keys.sample]
+  end
+
   def add_agent(coins, cash, action_odds)
     new_id = SecureRandom.uuid
     @agents[new_id] = Agent.new(coins, cash, action_odds)

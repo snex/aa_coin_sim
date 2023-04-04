@@ -9,7 +9,8 @@ class Vault
     @cash_accounts = {
       cash_vault:         CashAccount.new(cash),
       reward_pool:        CashAccount.new(0),
-      reinvest_pool:      CashAccount.new(0)
+      reinvest_pool:      CashAccount.new(0),
+      aa_holding_pool:    CashAccount.new(0)
     }
   end
 

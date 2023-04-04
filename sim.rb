@@ -18,6 +18,9 @@ class Sim
   # total amount of starting cash in pennies
   START_CASH = 100_000_000_000.freeze
 
+  # amount of cash each agent starts with (randomize?)
+  AGENT_STARTING_CASH = 100_000_000.freeze
+
   # odds that a given coin owned by an agent will be subject to a given action
   ACTIONS = {
     sell:     0.0001,
@@ -34,6 +37,12 @@ class Sim
 
   # number of weeks to run the sim
   WEEKS_MAX = 100.freeze
+
+  # percent of reward_pool to flow into aa_holding_pool each week
+  REWARD_POOL_TO_AA_HOLDING_POOL_PERCENT = 0.01
+
+  # percent of aa_holding_pool to flow into cash_vault each week
+  AA_HOLDING_POOL_TO_CASH_VAULT_PERCENT = 0.01
 
   ################ DO NOT EDIT BELOW ####################
 
@@ -61,7 +70,7 @@ class Sim
       coins_to_allocate = RandomVariateGenerator::Random.normal(mu: 0, sigma: 25_000).abs.to_i.clamp(1, coins_remaining)
       coins_allocated += coins_to_allocate
 
-      @agents.add_agent(coins_to_allocate, 0, ACTIONS)
+      @agents.add_agent(coins_to_allocate, AGENT_STARTING_CASH, ACTIONS)
     end
   end
 
@@ -100,6 +109,23 @@ class Sim
 
   def enact_agent_actions(week)
     puts '..enacting agent actions'
+    puts '....buying from holding_pool'
+    demanded_coins = rand(0..@vault.coins(:holding_pool))
+
+    demanded_coins.times do |i|
+      premium = rand((0.01)..(0.1))
+      buyer = @agents.get_random_agent
+
+      # check for inf loops
+      while buyer.cash.pennies < (@vault.coin_value + @vault.coin_value * premium)
+        buyer = @agents.get_random_agent
+      end
+
+      buyer.buy_coins(@vault, premium)
+    end
+
+    puts '....buying from holding_pool complete'
+
     puts '....running auction'
 
     pre_auction_vault_cash = @vault.cash
@@ -116,6 +142,11 @@ class Sim
     puts '....auction complete'
     enact_agent_sell_coins(week)
     puts '..agent actions completed'
+
+    puts '..adjusting accounts'
+    @vault.xfer_cash(:reward_pool, :aa_holding_pool, (@vault.cash(:reward_pool) * REWARD_POOL_TO_AA_HOLDING_POOL_PERCENT).round)
+    @vault.xfer_cash(:aa_holding_pool, :cash_vault, (@vault.cash(:aa_holding_pool) * AA_HOLDING_POOL_TO_CASH_VAULT_PERCENT).round)
+    puts '..adjusting accounts complete'
   end
 
   def enact_agent_sell_coins(week)

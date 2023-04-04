@@ -10,8 +10,7 @@ class Agent
     @action_odds = action_odds
     @action_table = {
       coins_to_sell: {},
-      coins_to_reinvest: {},
-      coins_to_buy: {}
+      coins_to_reinvest: {}
     }
   end
 
@@ -21,6 +20,10 @@ class Agent
 
   def remove_coins(coins)
     @coins.debit(coins)
+  end
+
+  def remove_cash(pennies)
+    @cash.debit(pennies)
   end
 
   def deposit_rei_tokens(tokens)
@@ -33,11 +36,16 @@ class Agent
 
   def calculate_actions(week)
     coins_to_sell, coins_to_reinvest, coins_to_stake = get_randoms_summing_to(@coins.coins, @action_odds.size, @action_odds.values)
-    coins_to_buy = 0 # something??
 
     @action_table[:coins_to_sell][week] = coins_to_sell
     @action_table[:coins_to_reinvest][week] = coins_to_reinvest
-    @action_table[:coins_to_buy][week] = coins_to_buy
+  end
+
+  def buy_coins(vault, premium)
+    vault.xfer_cash(@cash, :cash_vault, vault.coin_value)
+    vault.xfer_cash(@cash, :reward_pool, (vault.coin_value * premium).round)
+    vault.xfer_coins(:holding_pool, :coin_vault, 1)
+    deposit_coins(1)
   end
 
   def sell_coins(week, vault, semaphore = nil)
