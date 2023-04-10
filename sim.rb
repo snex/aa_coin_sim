@@ -32,6 +32,11 @@ class Sim
   # likely will be replaced by a mean and a stddev for plugging into normal distribution
   BUY_PRESSURE = (0.005..0.05).freeze
 
+  # when promise to buy is initiated, the mean number of coins to be promise-bought will be
+  # 10% of the promise_to_buy_pool divided by the current coin price. this percentage will
+  # then be added or subtracted randomly from that mean
+  PROMISE_TO_BUY_PRESSURE = (-0.05..0.05).freeze
+
   # the number of weeks somebody can commit to in the future
   ACTION_WEEKS_MAX = 50.freeze
 
