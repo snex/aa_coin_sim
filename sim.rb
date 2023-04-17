@@ -87,9 +87,21 @@ class Sim
     puts ''
     puts "running for #{WEEKS_MAX} weeks..."
 
+    File.open('agents_begin.txt', 'w') do |file|
+      file.puts "#{@agents.to_s(@vault)}"
+    end
+
+    puts 'Agent starting account details written to agents_begin.txt'
+
     WEEKS_MAX.times do |week|
       process_week(week)
     end
+
+    File.open('agents_end.txt', 'w') do |file|
+      file.puts "#{@agents.to_s(@vault)}"
+    end
+
+    puts 'Agent ending account details written to agents_end.txt'
   end
 
   def process_week(week)

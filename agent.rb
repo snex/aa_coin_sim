@@ -67,10 +67,12 @@ class Agent
     semaphore.unlock if semaphore
   end
 
-  def to_s
+  def to_s(vault)
     %{#{'Coins:'.rjust(21)} #{@coins.to_s.rjust(23)}
 #{'Cash:'.rjust(21)} #{@cash.to_s.rjust(23)}
 #{'REI Tokens:'.rjust(21)} #{@rei_tokens.to_s.rjust(23)}
+#{'=' * 45}
+#{'Total Value:'.rjust(21)} #{('$' + print_number('%0.02f' % ((@cash.pennies + vault.coin_value * @coins.coins) / 100.0).round(2))).to_s.rjust(23)}
     }
   end
 end

@@ -58,11 +58,11 @@ class AgentSet
     threads.map(&:join)
   end
 
-  def to_s
+  def to_s(vault)
     @agents.map do |id, agent|
       %{Agent #{id}
 #{'=' * 45}
-#{agent}}
+#{agent.to_s(vault)}}
     end.join("\n")
   end
 end
