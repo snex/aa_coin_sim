@@ -124,6 +124,16 @@ class Sim
   def calculate_agent_actions(week)
     puts '..calculating agent actions'
     @agents.calculate_actions(week)
+
+    total_coins_promise_to_buy = (0.1 * (@vault.cash(:promise_to_buy_pool) / @vault.coin_value) + rand(PROMISE_TO_BUY_PRESSURE)).floor
+    puts "total_coins_promise_to_buy: #{total_coins_promise_to_buy}"
+
+    total_coins_promise_to_buy.each do |pb_coins|
+      agent = @agents.get_random_agent
+      agent.action_table[:coins_to_buy][week + 2] ||= 0
+      agent.action_table[:coins_to_buy][week + 2] += 1
+    end
+
     puts '..agent actions calculated'
   end
 

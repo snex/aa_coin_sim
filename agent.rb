@@ -10,7 +10,8 @@ class Agent
     @action_odds = action_odds
     @action_table = {
       coins_to_sell: {},
-      coins_to_reinvest: {}
+      coins_to_reinvest: {},
+      coins_to_buy: {}
     }
   end
 
